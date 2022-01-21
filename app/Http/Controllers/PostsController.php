@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Post;
 use Illuminate\Http\Request;
 
 class PostsController extends Controller
@@ -14,18 +15,9 @@ class PostsController extends Controller
     public function index()
     {
         //
+        $posts = Post::with('page')->get();
+        return response()->json(['data'=> $posts]);
     }
-
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
-    }
-
     /**
      * Store a newly created resource in storage.
      *
@@ -35,6 +27,16 @@ class PostsController extends Controller
     public function store(Request $request)
     {
         //
+        $data = request()->validate([
+            'page_id'=> 'required|int',
+            'title'=> 'required|string',
+            'content' => 'required|string'
+        ]);
+        if(Post::create($data)){
+            return response()->json(['data'=>$data, 'status'=>' Post Record saved']);
+           }else{
+            return response()->json(['data'=>$data, 'status'=>'Wrong data parameters']);
+           }
     }
 
     /**
@@ -46,17 +48,8 @@ class PostsController extends Controller
     public function show($id)
     {
         //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
-    {
-        //
+        $post = Post::findOrFail($id);
+        return response()->json(['data'=>$post]);
     }
 
     /**
@@ -69,6 +62,18 @@ class PostsController extends Controller
     public function update(Request $request, $id)
     {
         //
+        $data = request()->validate([
+            'page_id'=> 'required|int',
+            'title'=> 'required|string',
+            'content' => 'required|string'
+        ]);
+        $post = Post::findOrFail($id);
+        if($post->update($request->all())){
+            return response()->json(['data'=>$data, 'status'=>' Post Record updated']);
+           }
+        
+
+
     }
 
     /**
@@ -80,5 +85,8 @@ class PostsController extends Controller
     public function destroy($id)
     {
         //
+        $post = Post::findOrFail($id);
+        $post->delete();
+        return response()->json(['data'=>$post, 'status'=>' Post Record deleted']);
     }
 }
